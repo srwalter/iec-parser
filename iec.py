@@ -102,6 +102,7 @@ for l in sys.stdin.readlines():
         if last_data == 1 and data == 0:
             if state == SENDER_READY and clk == 0:
                 state = RX_READY
+                eoi_counter = 0
         elif last_data == 0 and data == 1:
             if state == WAIT_FOR_RX_ACK:
                 if last_byte:
