@@ -50,40 +50,45 @@ for l in sys.stdin.readlines():
             atn = 0
 
     if "DD00 read" in l:
-        print(l)
+        #print(l)
+
+        last_clk = clk
+        last_data = data
 
         # VICE logging already inverts the DATA/CLK inputs
         if "CLK" in l:
-            if clk == 0:
-                if state == ACTIVE:
-                    active_count += 1
-                    if active_count == 8:
-                        recv_byte()
-                        active_count = 0
-                        buffer = 0
-
-                if state == RX_READY and data == 0:
-                    state = ACTIVE
-                    active_count = 0
-                    buffer = 0
             clk = 1
-
         else:
-            if clk == 1:
-                if state == IDLE:
-                    state = SENDER_READY
-                elif state == ACTIVE:
-                    buffer <<= 1
-                    buffer |= data
             clk = 0
 
         if "DATA" in l:
             data = 1
         else:
-            if data == 1:
-                if state == SENDER_READY and clk == 0:
-                    state = RX_READY
-            data = 0
+            data = 0;
+
+        if last_clk == 0 and clk == 1:
+            if state == ACTIVE:
+                active_count += 1
+                if active_count == 8:
+                    recv_byte()
+                    active_count = 0
+                    buffer = 0
+                else:
+                    buffer <<= 1
+
+            if state == RX_READY and data == 0:
+                state = ACTIVE
+                active_count = 0
+                buffer = 0
+        elif last_clk == 1 and clk == 0:
+            if state == IDLE:
+                state = SENDER_READY
+            elif state == ACTIVE:
+                buffer |= data
+
+        if last_data == 1 and data == 0:
+            if state == SENDER_READY and clk == 0:
+                state = RX_READY
 
     #print("atn {} state {} active_count {} buffer {:02x}".format(atn, state, active_count, buffer))
-    print("clk {} data {} atn {} state {} active_count {}".format(clk, data, atn, state, active_count))
+    #print("clk {} data {} atn {} state {} active_count {}".format(clk, data, atn, state, active_count))
