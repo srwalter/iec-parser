@@ -6,6 +6,8 @@ IDLE = 0
 SENDER_READY = 1
 RX_READY = 2
 ACTIVE = 3
+WAIT_FOR_RX_ACK = 4
+
 active_count = 0
 buffer = 0
 
@@ -49,7 +51,7 @@ for l in sys.stdin.readlines():
                 state = IDLE
             atn = 0
 
-    if "DD00 read" in l:
+    if "DD00 read" in l or "1800 read" in l:
         #print(l)
 
         last_clk = clk
@@ -71,6 +73,7 @@ for l in sys.stdin.readlines():
                 active_count += 1
                 if active_count == 8:
                     recv_byte()
+                    state = WAIT_FOR_RX_ACK
                     active_count = 0
                     buffer = 0
                 else:
@@ -89,6 +92,9 @@ for l in sys.stdin.readlines():
         if last_data == 1 and data == 0:
             if state == SENDER_READY and clk == 0:
                 state = RX_READY
+        elif last_data == 0 and data == 1:
+            if state == WAIT_FOR_RX_ACK:
+                state = IDLE
 
     #print("atn {} state {} active_count {} buffer {:02x}".format(atn, state, active_count, buffer))
     #print("clk {} data {} atn {} state {} active_count {}".format(clk, data, atn, state, active_count))
