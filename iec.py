@@ -104,12 +104,13 @@ for l in sys.stdin.readlines():
                 state = RX_READY
                 eoi_counter = 0
         elif last_data == 0 and data == 1:
-            if state == WAIT_FOR_RX_ACK:
-                if last_byte:
-                    byte_counter = 0
-                state = IDLE
-            elif state == EOI_ACK:
+            if state == EOI_ACK:
                 state = ACTIVE
+
+        if state == WAIT_FOR_RX_ACK and data == 1:
+            if last_byte:
+                byte_counter = 0
+            state = IDLE
 
         if state == RX_READY and data == 0 and clk == 0:
             eoi_counter += 1
