@@ -22,7 +22,6 @@ byte_counter = 0
 last_byte = False
 
 def recv_byte():
-    print("Got byte {:02x}".format(buffer))
     if atn == 1:
         if buffer == 0x3f:
             print("UNLISTEN")
@@ -38,6 +37,8 @@ def recv_byte():
             print("TALK {}".format(buffer & 0x1f))
         elif (buffer >> 5) & 7 == 0x3:
             print("SECOND {}".format(buffer & 0x1f))
+    else:
+        print("Got byte {:02x} {}".format(buffer, chr(buffer)))
 
 for l in sys.stdin.readlines():
     if not l:
