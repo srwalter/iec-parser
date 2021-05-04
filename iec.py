@@ -7,7 +7,8 @@ SENDER_READY = 1
 RX_READY = 2
 ACTIVE = 3
 WAIT_FOR_RX_ACK = 4
-EOI_ACK = 5
+EOI = 5
+EOI_ACK = 6
 
 active_count = 0
 buffer = 0
@@ -87,11 +88,12 @@ for l in sys.stdin.readlines():
                     buffer = 0
                 else:
                     buffer >>= 1
-
-            if state == RX_READY and data == 0:
+            elif state == RX_READY and data == 0:
                 state = ACTIVE
                 active_count = 0
                 buffer = 0
+            elif state == EOI:
+                state = EOI_ACK
         elif last_clk == 1 and clk == 0:
             if state == IDLE:
                 state = SENDER_READY
@@ -117,7 +119,7 @@ for l in sys.stdin.readlines():
             if eoi_counter >= 30:
                 print("LAST BYTE")
                 last_byte = True
-                state = EOI_ACK
+                state = EOI
 
     #print("atn {} state {} active_count {} buffer {:02x}".format(atn, state, active_count, buffer))
     #print("clk {} data {} atn {} state {} active_count {}".format(clk, data, atn, state, active_count))
