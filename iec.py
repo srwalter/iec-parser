@@ -22,7 +22,7 @@ last_byte = False
 
 def recv_byte():
     print("Got byte {:02x}".format(buffer))
-    if atn == 1 and byte_counter == 0:
+    if atn == 1:
         if buffer == 0x3f:
             print("UNLISTEN")
         elif buffer == 0x5f:
